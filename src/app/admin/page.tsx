@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -85,8 +86,9 @@ export default function AdminPage() {
 
   async function loadProducts() {
     const { data, error } = await supabase
-      .from("public_products")
-      .select("*");
+      .from("products")
+      .select("*")
+      .order("id", { ascending: false });
 
     if (error) {
       setMessage("Products load error: " + error.message);
@@ -149,10 +151,10 @@ export default function AdminPage() {
 
     const result = editingId
       ? await supabase
-          .from("public_products")
+          .from("products")
           .update(payload)
           .eq("id", editingId)
-      : await supabase.from("public_products").insert([payload]);
+      : await supabase.from("products").insert([payload]);
 
     setBusy(false);
 
@@ -425,4 +427,4 @@ export default function AdminPage() {
       </div>
     </main>
   );
-                  }
+}
