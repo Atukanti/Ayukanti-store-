@@ -67,8 +67,10 @@ export default function AdminPage() {
     });
 
     setBusy(false);
-    if (error) setMessage("Login failed: " + error.message);
-    else {
+
+    if (error) {
+      setMessage("Login failed: " + error.message);
+    } else {
       setLoggedIn(true);
       await loadProducts();
     }
@@ -84,8 +86,7 @@ export default function AdminPage() {
   async function loadProducts() {
     const { data, error } = await supabase
       .from("public_products")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("*");
 
     if (error) {
       setMessage("Products load error: " + error.message);
@@ -180,6 +181,7 @@ export default function AdminPage() {
             AYUKANTI
           </p>
           <h1 className="mt-2 text-3xl font-semibold">Admin Login</h1>
+
           <form onSubmit={login} className="mt-6 space-y-4">
             <label className="block text-sm font-medium">
               Email
@@ -191,6 +193,7 @@ export default function AdminPage() {
                 required
               />
             </label>
+
             <label className="block text-sm font-medium">
               Password
               <input
@@ -201,6 +204,7 @@ export default function AdminPage() {
                 required
               />
             </label>
+
             <button
               disabled={busy}
               className="w-full rounded-lg bg-[#263b2d] p-3 font-semibold text-white disabled:opacity-60"
@@ -208,6 +212,7 @@ export default function AdminPage() {
               {busy ? "Signing in..." : "Sign In"}
             </button>
           </form>
+
           {message && <p className="mt-4 break-words text-sm">{message}</p>}
         </section>
       </main>
@@ -224,6 +229,7 @@ export default function AdminPage() {
             </p>
             <h1 className="mt-1 text-3xl font-semibold">Product Management</h1>
           </div>
+
           <button
             onClick={logout}
             className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium"
@@ -278,9 +284,7 @@ export default function AdminPage() {
                 step="0.01"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.cost_price}
-                onChange={(e) =>
-                  setForm({ ...form, cost_price: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, cost_price: e.target.value })}
                 required
               />
             </label>
@@ -318,9 +322,7 @@ export default function AdminPage() {
                 type="url"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.image_url}
-                onChange={(e) =>
-                  setForm({ ...form, image_url: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                 placeholder="https://..."
               />
             </label>
@@ -331,9 +333,7 @@ export default function AdminPage() {
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 rows={3}
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </label>
 
@@ -341,9 +341,7 @@ export default function AdminPage() {
               <input
                 type="checkbox"
                 checked={form.is_active}
-                onChange={(e) =>
-                  setForm({ ...form, is_active: e.target.checked })
-                }
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
               />
               Product is active on store
             </label>
@@ -355,6 +353,7 @@ export default function AdminPage() {
               >
                 {busy ? "Saving..." : editingId ? "Update Product" : "Add Product"}
               </button>
+
               {editingId && (
                 <button
                   type="button"
@@ -379,6 +378,7 @@ export default function AdminPage() {
             <h2 className="text-2xl font-semibold">
               Products ({products.length})
             </h2>
+
             <button
               onClick={loadProducts}
               className="rounded-lg border px-4 py-2 text-sm font-medium"
@@ -405,6 +405,7 @@ export default function AdminPage() {
                     {p.is_active ? "Active" : "Inactive"}
                   </p>
                 </div>
+
                 <button
                   onClick={() => editProduct(p)}
                   className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium"
@@ -424,4 +425,4 @@ export default function AdminPage() {
       </div>
     </main>
   );
-                }
+                  }
