@@ -17,7 +17,19 @@ type Product = {
   is_active: boolean | null;
 };
 
-const emptyProduct = {
+type ProductForm = {
+  name: string;
+  category: string;
+  price: string;
+  cost_price: string;
+  discount: string;
+  stock: string;
+  description: string;
+  image_url: string;
+  is_active: boolean;
+};
+
+const emptyProduct: ProductForm = {
   name: "",
   category: "",
   price: "0",
@@ -33,28 +45,53 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
-  const [form, setForm] = useState(emptyProduct);
+  const [form, setForm] = useState<ProductForm>({ ...emptyProduct });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        setLoggedIn(true);
-        loadProducts();
+    let mounted = true;
+
+    async function checkSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+
+      if (error) {
+        setMessage("Session error: " + error.message);
       }
-    });
+
+      setLoggedIn(!!data.session);
+      setCheckingSession(false);
+
+      if (data.session) {
+        await loadProducts();
+      }
+    }
+
+    checkSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        if (!mounted) return;
+
         setLoggedIn(!!session);
-        if (!session) setProducts([]);
+
+        if (!session) {
+          setProducts([]);
+          setEditingId(null);
+          setForm({ ...emptyProduct });
+        }
       }
     );
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   async function login(e: React.FormEvent<HTMLFormElement>) {
@@ -63,7 +100,7 @@ export default function AdminPage() {
     setMessage("");
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
@@ -71,16 +108,30 @@ export default function AdminPage() {
 
     if (error) {
       setMessage("Login failed: " + error.message);
-    } else {
-      setLoggedIn(true);
-      await loadProducts();
+      return;
     }
+
+    setPassword("");
+    setLoggedIn(true);
+    await loadProducts();
   }
 
   async function logout() {
-    await supabase.auth.signOut();
+    setBusy(true);
+
+    const { error } = await supabase.auth.signOut();
+
+    setBusy(false);
+
+    if (error) {
+      setMessage("Logout error: " + error.message);
+      return;
+    }
+
     setLoggedIn(false);
     setProducts([]);
+    setForm({ ...emptyProduct });
+    setEditingId(null);
     setMessage("");
   }
 
@@ -100,6 +151,7 @@ export default function AdminPage() {
 
   function editProduct(p: Product) {
     setEditingId(p.id);
+
     setForm({
       name: p.name || "",
       category: p.category || "",
@@ -111,50 +163,75 @@ export default function AdminPage() {
       image_url: p.image_url || "",
       is_active: p.is_active ?? true,
     });
+
     setMessage("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function cancelEdit() {
+    setEditingId(null);
+    setForm({ ...emptyProduct });
+    setMessage("");
+  }
+
   async function saveProduct(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (busy) return;
+
+    const price = Number(form.price);
+    const costPrice = Number(form.cost_price);
+    const discount = Number(form.discount);
+    const stock = Number(form.stock);
+
+    if (
+      !form.name.trim() ||
+      form.price.trim() === "" ||
+      form.cost_price.trim() === "" ||
+      form.discount.trim() === "" ||
+      form.stock.trim() === "" ||
+      !Number.isFinite(price) ||
+      !Number.isFinite(costPrice) ||
+      !Number.isFinite(discount) ||
+      !Number.isFinite(stock) ||
+      price < 0 ||
+      costPrice < 0 ||
+      discount < 0 ||
+      discount > 100 ||
+      stock < 0 ||
+      !Number.isInteger(stock)
+    ) {
+      setMessage(
+        "Details check karo. Prices non-negative, discount 0–100 ane stock whole number hovo joie."
+      );
+      return;
+    }
+
     setBusy(true);
     setMessage("");
 
     const payload = {
       name: form.name.trim(),
-      category: form.category.trim(),
-      price: Number(form.price),
-      cost_price: Number(form.cost_price),
-      discount: Number(form.discount),
-      stock: Number(form.stock),
-      description: form.description.trim(),
+      category: form.category.trim() || null,
+      price,
+      cost_price: costPrice,
+      discount,
+      stock,
+      description: form.description.trim() || null,
       image_url: form.image_url.trim() || null,
       is_active: form.is_active,
     };
-
-    if (
-      !payload.name ||
-      !Number.isFinite(payload.price) ||
-      !Number.isFinite(payload.cost_price) ||
-      !Number.isFinite(payload.discount) ||
-      !Number.isFinite(payload.stock) ||
-      payload.price < 0 ||
-      payload.cost_price < 0 ||
-      payload.discount < 0 ||
-      payload.discount > 100 ||
-      payload.stock < 0
-    ) {
-      setMessage("Please check product details. Discount must be 0–100.");
-      setBusy(false);
-      return;
-    }
 
     const result = editingId
       ? await supabase
           .from("products")
           .update(payload)
           .eq("id", editingId)
-      : await supabase.from("products").insert([payload]);
+          .select("id")
+      : await supabase
+          .from("products")
+          .insert([payload])
+          .select("id");
 
     setBusy(false);
 
@@ -163,16 +240,67 @@ export default function AdminPage() {
       return;
     }
 
+    if (!result.data || result.data.length === 0) {
+      setMessage(
+        "Save confirm nathi thayu. Database permissions check karvi padse."
+      );
+      return;
+    }
+
     setMessage(editingId ? "Product updated." : "Product added.");
-    setForm(emptyProduct);
+    setForm({ ...emptyProduct });
     setEditingId(null);
     await loadProducts();
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-    setForm(emptyProduct);
+  async function toggleProductStatus(p: Product) {
+    if (busy) return;
+
+    const nextActive = !(p.is_active ?? true);
+    const action = nextActive ? "activate" : "deactivate";
+
+    const confirmed = window.confirm(
+      `"${p.name}" ne ${action} karvo chhe?`
+    );
+
+    if (!confirmed) return;
+
+    setBusy(true);
     setMessage("");
+
+    const { data, error } = await supabase
+      .from("products")
+      .update({ is_active: nextActive })
+      .eq("id", p.id)
+      .select("id");
+
+    setBusy(false);
+
+    if (error) {
+      setMessage("Status update error: " + error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setMessage("Status change confirm nathi thayu.");
+      return;
+    }
+
+    setMessage(
+      nextActive ? "Product activated." : "Product deactivated."
+    );
+
+    await loadProducts();
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="min-h-screen bg-[#faf7ef] p-6 text-[#263b2d]">
+        <p className="mx-auto mt-16 max-w-md text-center">
+          Checking login...
+        </p>
+      </main>
+    );
   }
 
   if (!loggedIn) {
@@ -182,6 +310,7 @@ export default function AdminPage() {
           <p className="text-sm font-semibold tracking-widest text-[#997344]">
             AYUKANTI
           </p>
+
           <h1 className="mt-2 text-3xl font-semibold">Admin Login</h1>
 
           <form onSubmit={login} className="mt-6 space-y-4">
@@ -190,6 +319,7 @@ export default function AdminPage() {
               <input
                 className="mt-1 w-full rounded-lg border p-3 text-base text-gray-900"
                 type="email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -201,6 +331,7 @@ export default function AdminPage() {
               <input
                 className="mt-1 w-full rounded-lg border p-3 text-base text-gray-900"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -208,6 +339,7 @@ export default function AdminPage() {
             </label>
 
             <button
+              type="submit"
               disabled={busy}
               className="w-full rounded-lg bg-[#263b2d] p-3 font-semibold text-white disabled:opacity-60"
             >
@@ -215,7 +347,11 @@ export default function AdminPage() {
             </button>
           </form>
 
-          {message && <p className="mt-4 break-words text-sm">{message}</p>}
+          {message && (
+            <p className="mt-4 break-words rounded-lg bg-[#f8f0dc] p-3 text-sm">
+              {message}
+            </p>
+          )}
         </section>
       </main>
     );
@@ -229,12 +365,16 @@ export default function AdminPage() {
             <p className="text-sm font-semibold tracking-widest text-[#997344]">
               AYUKANTI
             </p>
-            <h1 className="mt-1 text-3xl font-semibold">Product Management</h1>
+            <h1 className="mt-1 text-3xl font-semibold">
+              Product Management
+            </h1>
           </div>
 
           <button
+            type="button"
             onClick={logout}
-            className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium"
+            disabled={busy}
+            className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium disabled:opacity-50"
           >
             Sign Out
           </button>
@@ -245,13 +385,18 @@ export default function AdminPage() {
             {editingId ? "Edit Product" : "Add New Product"}
           </h2>
 
-          <form onSubmit={saveProduct} className="mt-4 grid gap-4 sm:grid-cols-2">
+          <form
+            onSubmit={saveProduct}
+            className="mt-4 grid gap-4 sm:grid-cols-2"
+          >
             <label className="text-sm font-medium">
               Product Name *
               <input
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
                 required
               />
             </label>
@@ -261,7 +406,9 @@ export default function AdminPage() {
               <input
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
               />
             </label>
 
@@ -273,20 +420,24 @@ export default function AdminPage() {
                 step="0.01"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, price: e.target.value })
+                }
                 required
               />
             </label>
 
             <label className="text-sm font-medium">
-              Cost Price (₹)
+              Cost Price (₹) *
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.cost_price}
-                onChange={(e) => setForm({ ...form, cost_price: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, cost_price: e.target.value })
+                }
                 required
               />
             </label>
@@ -300,7 +451,9 @@ export default function AdminPage() {
                 step="0.01"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.discount}
-                onChange={(e) => setForm({ ...form, discount: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, discount: e.target.value })
+                }
                 required
               />
             </label>
@@ -313,7 +466,9 @@ export default function AdminPage() {
                 step="1"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, stock: e.target.value })
+                }
                 required
               />
             </label>
@@ -324,7 +479,9 @@ export default function AdminPage() {
                 type="url"
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 value={form.image_url}
-                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, image_url: e.target.value })
+                }
                 placeholder="https://..."
               />
             </label>
@@ -335,7 +492,9 @@ export default function AdminPage() {
                 className="mt-1 w-full rounded-lg border p-3 text-base"
                 rows={3}
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
               />
             </label>
 
@@ -343,24 +502,32 @@ export default function AdminPage() {
               <input
                 type="checkbox"
                 checked={form.is_active}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                onChange={(e) =>
+                  setForm({ ...form, is_active: e.target.checked })
+                }
               />
               Product is active on store
             </label>
 
             <div className="flex flex-wrap gap-3 sm:col-span-2">
               <button
+                type="submit"
                 disabled={busy}
                 className="rounded-lg bg-[#263b2d] px-5 py-3 font-semibold text-white disabled:opacity-60"
               >
-                {busy ? "Saving..." : editingId ? "Update Product" : "Add Product"}
+                {busy
+                  ? "Saving..."
+                  : editingId
+                    ? "Update Product"
+                    : "Add Product"}
               </button>
 
               {editingId && (
                 <button
                   type="button"
                   onClick={cancelEdit}
-                  className="rounded-lg border px-5 py-3 font-medium"
+                  disabled={busy}
+                  className="rounded-lg border px-5 py-3 font-medium disabled:opacity-50"
                 >
                   Cancel Edit
                 </button>
@@ -376,14 +543,16 @@ export default function AdminPage() {
         </section>
 
         <section className="mt-8">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold">
               Products ({products.length})
             </h2>
 
             <button
+              type="button"
               onClick={loadProducts}
-              className="rounded-lg border px-4 py-2 text-sm font-medium"
+              disabled={busy}
+              className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               Refresh
             </button>
@@ -397,29 +566,47 @@ export default function AdminPage() {
               >
                 <div className="min-w-0">
                   <h3 className="font-semibold">{p.name}</h3>
+
                   <p className="text-sm text-gray-600">
-                    {p.category || "Uncategorized"} · ₹{p.price} · Stock: {p.stock}
+                    {p.category || "Uncategorized"} · ₹{p.price} · Stock:{" "}
+                    {p.stock}
                   </p>
+
                   <p className="text-sm text-gray-600">
-                    Cost: ₹{p.cost_price ?? 0} · Discount: {p.discount ?? 0}%
+                    Cost: ₹{p.cost_price ?? 0} · Discount:{" "}
+                    {p.discount ?? 0}%
                   </p>
+
                   <p className="text-sm">
-                    {p.is_active ? "Active" : "Inactive"}
+                    Status: {p.is_active ? "Active" : "Inactive"}
                   </p>
                 </div>
 
-                <button
-                  onClick={() => editProduct(p)}
-                  className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium"
-                >
-                  Edit
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => editProduct(p)}
+                    disabled={busy}
+                    className="rounded-lg border border-[#263b2d] px-4 py-2 font-medium disabled:opacity-50"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toggleProductStatus(p)}
+                    disabled={busy}
+                    className="rounded-lg border border-red-600 px-4 py-2 font-medium text-red-600 disabled:opacity-50"
+                  >
+                    {p.is_active ? "Deactivate" : "Activate"}
+                  </button>
+                </div>
               </article>
             ))}
 
             {products.length === 0 && (
               <p className="rounded-xl border bg-white p-5 text-sm text-gray-600">
-                No products found, or the database returned an error.
+                No products found. Refresh karo athva upar no error check karo.
               </p>
             )}
           </div>
