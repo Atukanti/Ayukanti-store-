@@ -18,7 +18,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const whatsapp = "https://wa.me/91XXXXXXXXXX";
+  const whatsapp = "https://wa.me/919313688716";
 
   useEffect(() => {
     async function loadProducts() {
@@ -39,84 +39,131 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#faf8f2] text-[#203b2d]">
-      <div className="bg-[#203b2d] px-4 py-2 text-center text-xs tracking-widest text-white">
+    <main className="min-h-screen bg-[#fbf8f1] text-[#26352b]">
+
+      {/* Announcement */}
+      <div className="bg-[#eee8d9] px-4 py-3 text-center text-[11px] font-semibold tracking-[0.2em] text-[#344b35]">
         ROOTED IN NATURE · INSPIRED BY AYURVEDA
       </div>
 
-      <header className="flex items-center justify-between border-b border-[#e7e4d9] px-5 py-5 md:px-12">
-        <a href="#" className="text-2xl font-serif font-semibold tracking-wide">
-          ayukanti<span className="text-[#a77c43]">.</span>
+      {/* Header */}
+      <header className="flex items-center justify-between border-b border-[#e6dece] bg-[#fffdf8] px-5 py-5 md:px-12">
+        <a href="#" className="font-serif text-3xl font-semibold tracking-wide text-[#263b2d]">
+          ayukanti<span className="text-[#ad8750]">.</span>
         </a>
-        <a href="#products" className="rounded-full border border-[#203b2d] px-4 py-2 text-sm">
+
+        <a
+          href="#products"
+          className="rounded-full border border-[#536447] px-5 py-2.5 text-sm font-semibold text-[#263b2d] transition hover:bg-[#eee8d9]"
+        >
           Explore products ↗
         </a>
       </header>
 
-      <section className="grid items-center gap-8 px-6 py-14 md:grid-cols-2 md:px-16 md:py-24">
+      {/* Hero */}
+      <section className="grid items-center gap-10 px-6 py-16 md:grid-cols-2 md:px-16 md:py-24">
+
         <div>
-          <p className="mb-5 text-xs tracking-[0.25em] text-[#997849]">
+          <p className="mb-5 text-xs font-semibold tracking-[0.25em] text-[#997344]">
             NATURE, MADE PART OF YOU
           </p>
-          <h1 className="max-w-xl font-serif text-5xl leading-[1.12] md:text-7xl">
-            A little closer to <span className="italic">nature.</span>
+
+          <h1 className="max-w-xl font-serif text-5xl font-medium leading-[1.12] text-[#263b2d] md:text-7xl">
+            A little closer to <span className="italic text-[#71805e]">nature.</span>
           </h1>
-          <p className="mt-6 max-w-md text-base leading-7 text-[#657064]">
+
+          <p className="mt-6 max-w-md text-base leading-8 text-[#454d42]">
             Explore a thoughtful collection of herbal and natural products,
             inspired by timeless traditions and everyday rituals.
           </p>
-          <a href="#products" className="mt-8 inline-block rounded-full bg-[#203b2d] px-7 py-4 text-sm text-white">
+
+          <a
+            href="#products"
+            className="mt-8 inline-block rounded-full border border-[#c6ad7d] bg-[#e9e4d4] px-8 py-4 text-sm font-bold text-[#17251b] shadow-sm transition hover:bg-[#ded5bd]"
+          >
             Discover the collection ↗
           </a>
-          <p className="mt-5 text-xs text-[#7c8276]">
+
+          <p className="mt-5 text-xs font-medium text-[#555d50]">
             Thoughtfully presented · Easy WhatsApp enquiries
           </p>
         </div>
 
-        <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-t-full bg-[#e6eadc] md:min-h-[470px]">
-          <div className="absolute left-7 top-10 text-5xl text-[#879777]">❧</div>
-          <div className="absolute bottom-12 right-8 rotate-12 text-6xl text-[#879777]">❋</div>
-          <div className="flex h-56 w-40 flex-col items-center justify-center rounded-t-[48px] rounded-b-2xl border border-[#c9c6ac] bg-[#f8f5eb] shadow-xl">
-            <span className="text-3xl text-[#a77c43]">✳</span>
-            <span className="mt-3 font-serif text-xl">ayukanti</span>
-            <span className="mt-2 text-[9px] tracking-[0.2em]">BOTANICAL CARE</span>
+        {/* Botanical Visual */}
+        <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-t-full rounded-b-3xl border border-[#e5ddca] bg-[#eeeede] md:min-h-[480px]">
+          <div className="absolute left-8 top-12 rotate-[-15deg] font-serif text-7xl text-[#849274]">
+            ❧
           </div>
-          <p className="absolute bottom-5 text-xs tracking-widest text-[#596950]">
-            SIMPLE. NATURAL. THOUGHTFUL.
+
+          <div className="absolute bottom-16 right-8 rotate-12 font-serif text-7xl text-[#849274]">
+            ❋
+          </div>
+
+          <div className="flex h-60 w-44 flex-col items-center justify-center rounded-t-[55px] rounded-b-3xl border border-[#c9b993] bg-[#fffdf5] shadow-xl">
+            <span className="text-4xl text-[#a77c43]">✳</span>
+            <span className="mt-3 font-serif text-2xl font-semibold text-[#344633]">
+              ayukanti
+            </span>
+            <span className="mt-2 text-[9px] font-semibold tracking-[0.2em] text-[#665c45]">
+              BOTANICAL CARE
+            </span>
+          </div>
+
+          <p className="absolute bottom-6 text-[10px] font-semibold tracking-[0.2em] text-[#46533d]">
+            SIMPLE · NATURAL · THOUGHTFUL
           </p>
         </div>
       </section>
 
-      <section className="border-y border-[#e7e4d9] px-6 py-6">
-        <div className="mx-auto grid max-w-5xl grid-cols-3 gap-3 text-center text-xs tracking-wide text-[#657064] md:text-sm">
+      {/* Features */}
+      <section className="border-y border-[#e6dece] bg-[#f3efe5] px-6 py-7">
+        <div className="mx-auto grid max-w-5xl grid-cols-3 gap-3 text-center text-[11px] font-semibold tracking-wide text-[#394638] md:text-sm">
           <p>✳ Nature-inspired</p>
           <p>❧ Thoughtful choices</p>
           <p>♡ Personal enquiries</p>
         </div>
       </section>
 
-      <section id="products" className="px-5 py-14 md:px-12 md:py-20">
-        <div className="mb-8">
-          <p className="mb-3 text-xs tracking-[0.2em] text-[#997849]">
+      {/* Products */}
+      <section id="products" className="px-5 py-16 md:px-12 md:py-20">
+
+        <div className="mb-10 text-center">
+          <p className="mb-3 text-xs font-bold tracking-[0.25em] text-[#997344]">
             THE AYUKANTI EDIT
           </p>
-          <h2 className="font-serif text-3xl md:text-5xl">
+
+          <h2 className="font-serif text-4xl font-medium text-[#263b2d] md:text-5xl">
             Explore our collection
           </h2>
+
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#50584c]">
+            Discover thoughtful choices inspired by nature and made for your everyday rituals.
+          </p>
         </div>
 
         {loading ? (
-          <p className="py-10 text-center">Loading products...</p>
+          <p className="py-12 text-center font-medium text-[#344633]">
+            Loading products...
+          </p>
         ) : products.length === 0 ? (
-          <p className="py-10 text-center">No products available yet.</p>
+          <p className="py-12 text-center font-medium text-[#344633]">
+            No products available yet.
+          </p>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => {
-              const finalPrice = product.price * (1 - (product.discount || 0) / 100);
+              const price = Number(product.price) || 0;
+              const discount = Number(product.discount) || 0;
+              const finalPrice = price * (1 - discount / 100);
+
+              const message = `Hello Ayukanti, I am interested in ${product.name}. Price: ₹${finalPrice.toFixed(0)}. Please share details.`;
 
               return (
-                <article key={product.id} className="overflow-hidden rounded-2xl border border-[#e7e4d9] bg-white">
-                  <div className="flex h-56 items-center justify-center bg-[#e5ebd9]">
+                <article
+                  key={product.id}
+                  className="overflow-hidden rounded-2xl border border-[#e6dece] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="flex h-60 items-center justify-center bg-[#f0eee3]">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
@@ -124,45 +171,61 @@ export default function Home() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-36 w-24 flex-col items-center justify-center rounded-t-2xl rounded-b-xl border border-[#c8c5b1] bg-[#faf8f0] shadow-lg">
+                      <div className="flex h-36 w-24 flex-col items-center justify-center rounded-t-2xl rounded-b-xl border border-[#c8bd9f] bg-[#fffdf5] shadow-md">
                         <span className="text-3xl text-[#a77c43]">✿</span>
-                        <span className="mt-2 font-serif text-sm">ayukanti</span>
-                        <span className="mt-1 text-[7px] tracking-widest">BOTANICAL</span>
+                        <span className="mt-2 font-serif text-sm font-semibold text-[#344633]">
+                          ayukanti
+                        </span>
+                        <span className="mt-1 text-[7px] font-semibold tracking-widest text-[#5c614e]">
+                          BOTANICAL
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="p-5">
-                    <p className="text-[10px] tracking-[0.2em] text-[#997849]">
+                  <div className="p-6">
+                    <p className="text-[10px] font-bold tracking-[0.2em] text-[#997344]">
                       {product.category}
                     </p>
-                    <h3 className="mt-2 font-serif text-2xl">{product.name}</h3>
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-[#657064]">
+
+                    <h3 className="mt-2 font-serif text-2xl font-semibold text-[#263b2d]">
+                      {product.name}
+                    </h3>
+
+                    <p className="mt-3 min-h-12 text-sm leading-7 text-[#454d42]">
                       {product.description}
                     </p>
 
-                    <div className="mt-5 border-t border-[#e7e4d9] pt-4">
-                      <div className="flex items-center justify-between">
+                    <div className="mt-5 border-t border-[#e8e1d3] pt-5">
+                      <div className="flex items-center justify-between gap-2">
                         <div>
-                          <span className="text-lg">₹{finalPrice.toFixed(0)}</span>
-                          {product.discount > 0 && (
-                            <span className="ml-2 text-sm text-gray-400 line-through">
-                              ₹{product.price}
+                          <span className="text-xl font-bold text-[#263b2d]">
+                            ₹{finalPrice.toFixed(0)}
+                          </span>
+
+                          {discount > 0 && (
+                            <span className="ml-2 text-sm font-medium text-[#77776c] line-through">
+                              ₹{price.toFixed(0)}
                             </span>
                           )}
                         </div>
-                        <span className={`text-xs ${product.stock > 0 ? "text-green-700" : "text-red-600"}`}>
+
+                        <span
+                          className={`text-xs font-bold ${
+                            product.stock > 0
+                              ? "text-[#35643a]"
+                              : "text-[#a33232]"
+                          }`}
+                        >
                           {product.stock > 0 ? "In Stock" : "Out of Stock"}
                         </span>
                       </div>
 
                       <a
-                        href={`${whatsapp}?text=${encodeURIComponent(
-                          `Hello Ayukanti, I am interested in ${product.name}. Price: ₹${finalPrice}. Please share details.`
-                        )}`}
+                        href={`${whatsapp}?text=${encodeURIComponent(message)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-4 block rounded-full bg-[#203b2d] px-4 py-3 text-center text-xs text-white"
+                        className="mt-5 block rounded-full border border-[#a9b18f] bg-[#dfe7d4] px-4 py-3.5 text-center text-sm font-bold text-[#17251b] transition hover:bg-[#cdd9be]"
                       >
                         Enquire on WhatsApp ↗
                       </a>
@@ -175,30 +238,45 @@ export default function Home() {
         )}
       </section>
 
-      <section className="mx-5 mb-14 rounded-3xl bg-[#203b2d] px-6 py-12 text-center text-white md:mx-12 md:py-16">
-        <p className="text-xs tracking-[0.25em] text-[#d6c29a]">
+      {/* Contact Section */}
+      <section className="mx-5 mb-16 rounded-3xl border border-[#e2d6bd] bg-[#eee8d9] px-6 py-14 text-center md:mx-12 md:py-20">
+
+        <p className="text-xs font-bold tracking-[0.25em] text-[#997344]">
           YOUR NEXT NATURAL RITUAL
         </p>
-        <h2 className="mx-auto mt-4 max-w-xl font-serif text-3xl md:text-5xl">
+
+        <h2 className="mx-auto mt-5 max-w-xl font-serif text-4xl font-medium text-[#263b2d] md:text-5xl">
           Let&apos;s find what suits you.
         </h2>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-[#e0e5d9]">
+
+        <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-[#454d42]">
           Have a question about a product? Contact us directly for details.
         </p>
-        <a href={whatsapp} target="_blank" rel="noreferrer" className="mt-7 inline-block rounded-full bg-[#faf8f2] px-7 py-4 text-sm text-[#203b2d]">
+
+        <a
+          href={`${whatsapp}?text=${encodeURIComponent("Hello Ayukanti, I would like to know more about your products.")}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-8 inline-block rounded-full border border-[#b69a69] bg-[#fffdf5] px-8 py-4 text-sm font-bold text-[#17251b] shadow-sm transition hover:bg-[#e8dfca]"
+        >
           Chat on WhatsApp ↗
         </a>
       </section>
 
-      <footer className="border-t border-[#e7e4d9] px-6 py-7 text-center">
-        <p className="font-serif text-xl">ayukanti.</p>
-        <p className="mt-2 text-xs text-[#7c8276]">
+      {/* Footer */}
+      <footer className="border-t border-[#e6dece] bg-[#f3efe5] px-6 py-9 text-center">
+        <p className="font-serif text-2xl font-semibold text-[#263b2d]">
+          ayukanti<span className="text-[#ad8750]">.</span>
+        </p>
+
+        <p className="mt-3 text-xs font-medium text-[#50584c]">
           Inspired by nature. Made for everyday rituals.
         </p>
-        <p className="mt-4 text-[10px] text-[#7c8276]">
+
+        <p className="mt-5 text-[10px] font-medium text-[#66675d]">
           © {new Date().getFullYear()} Ayukanti
         </p>
       </footer>
     </main>
   );
-      }
+}
