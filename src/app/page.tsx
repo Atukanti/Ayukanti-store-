@@ -1,33 +1,42 @@
+"use client";
 
-const products = [
-  {
-    name: "Herbal Face Mist",
-    category: "SKINCARE",
-    description: "A refreshing botanical ritual for your daily skincare routine.",
-    price: "₹299",
-    symbol: "✿",
-    color: "#e5ebd9",
-  },
-  {
-    name: "Ayurvedic Hair Oil",
-    category: "HAIR CARE",
-    description: "A traditional-inspired hair care ritual with botanical goodness.",
-    price: "₹399",
-    symbol: "❋",
-    color: "#eee2cc",
-  },
-  {
-    name: "Herbal Wellness Blend",
-    category: "WELLNESS",
-    description: "Discover thoughtfully selected ingredients inspired by nature.",
-    price: "₹249",
-    symbol: "❧",
-    color: "#e8e2d5",
-  },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type Product = {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  discount: number;
+  stock: number;
+  image_url: string | null;
+};
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const whatsapp = "https://wa.me/91XXXXXXXXXX";
+
+  useEffect(() => {
+    async function loadProducts() {
+      const { data, error } = await supabase
+        .from("public_products")
+        .select("*");
+
+      if (error) {
+        console.error("Product loading error:", error);
+      } else {
+        setProducts((data || []) as Product[]);
+      }
+
+      setLoading(false);
+    }
+
+    loadProducts();
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#faf8f2] text-[#203b2d]">
@@ -39,10 +48,7 @@ export default function Home() {
         <a href="#" className="text-2xl font-serif font-semibold tracking-wide">
           ayukanti<span className="text-[#a77c43]">.</span>
         </a>
-        <a
-          href="#products"
-          className="rounded-full border border-[#203b2d] px-4 py-2 text-sm"
-        >
+        <a href="#products" className="rounded-full border border-[#203b2d] px-4 py-2 text-sm">
           Explore products ↗
         </a>
       </header>
@@ -59,10 +65,7 @@ export default function Home() {
             Explore a thoughtful collection of herbal and natural products,
             inspired by timeless traditions and everyday rituals.
           </p>
-          <a
-            href="#products"
-            className="mt-8 inline-block rounded-full bg-[#203b2d] px-7 py-4 text-sm text-white"
-          >
+          <a href="#products" className="mt-8 inline-block rounded-full bg-[#203b2d] px-7 py-4 text-sm text-white">
             Discover the collection ↗
           </a>
           <p className="mt-5 text-xs text-[#7c8276]">
@@ -93,63 +96,83 @@ export default function Home() {
       </section>
 
       <section id="products" className="px-5 py-14 md:px-12 md:py-20">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="mb-3 text-xs tracking-[0.2em] text-[#997849]">
-              THE AYUKANTI EDIT
-            </p>
-            <h2 className="font-serif text-3xl md:text-5xl">
-              Explore our collection
-            </h2>
-          </div>
-          <span className="pb-1 text-xs text-[#657064]">01 — 03</span>
+        <div className="mb-8">
+          <p className="mb-3 text-xs tracking-[0.2em] text-[#997849]">
+            THE AYUKANTI EDIT
+          </p>
+          <h2 className="font-serif text-3xl md:text-5xl">
+            Explore our collection
+          </h2>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <article
-              key={product.name}
-              className="overflow-hidden rounded-2xl border border-[#e7e4d9] bg-white"
-            >
-              <div
-                className="flex h-56 items-center justify-center"
-                style={{ backgroundColor: product.color }}
-              >
-                <div className="flex h-36 w-24 flex-col items-center justify-center rounded-t-2xl rounded-b-xl border border-[#c8c5b1] bg-[#faf8f0] shadow-lg">
-                  <span className="text-3xl text-[#a77c43]">{product.symbol}</span>
-                  <span className="mt-2 font-serif text-sm">ayukanti</span>
-                  <span className="mt-1 text-[7px] tracking-widest">BOTANICAL</span>
-                </div>
-              </div>
-              <div className="p-5">
-                <p className="text-[10px] tracking-[0.2em] text-[#997849]">
-                  {product.category}
-                </p>
-                <h3 className="mt-2 font-serif text-2xl">{product.name}</h3>
-                <p className="mt-2 min-h-12 text-sm leading-6 text-[#657064]">
-                  {product.description}
-                </p>
-                <div className="mt-5 flex items-center justify-between border-t border-[#e7e4d9] pt-4">
-                  <span className="text-lg">{product.price}</span>
-                  <a
-                    href={`${whatsapp}?text=${encodeURIComponent(
-                      `Hello Ayukanti, I am interested in ${product.name} (${product.price}). Please share details.`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full bg-[#203b2d] px-4 py-3 text-xs text-white"
-                  >
-                    Enquire ↗
-                  </a>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-        <p className="mt-5 text-xs leading-5 text-[#7c8276]">
-          Sample products and prices are for layout preview only. Replace them
-          with your actual products before publishing.
-        </p>
+        {loading ? (
+          <p className="py-10 text-center">Loading products...</p>
+        ) : products.length === 0 ? (
+          <p className="py-10 text-center">No products available yet.</p>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((product) => {
+              const finalPrice = product.price * (1 - (product.discount || 0) / 100);
+
+              return (
+                <article key={product.id} className="overflow-hidden rounded-2xl border border-[#e7e4d9] bg-white">
+                  <div className="flex h-56 items-center justify-center bg-[#e5ebd9]">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-36 w-24 flex-col items-center justify-center rounded-t-2xl rounded-b-xl border border-[#c8c5b1] bg-[#faf8f0] shadow-lg">
+                        <span className="text-3xl text-[#a77c43]">✿</span>
+                        <span className="mt-2 font-serif text-sm">ayukanti</span>
+                        <span className="mt-1 text-[7px] tracking-widest">BOTANICAL</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <p className="text-[10px] tracking-[0.2em] text-[#997849]">
+                      {product.category}
+                    </p>
+                    <h3 className="mt-2 font-serif text-2xl">{product.name}</h3>
+                    <p className="mt-2 min-h-12 text-sm leading-6 text-[#657064]">
+                      {product.description}
+                    </p>
+
+                    <div className="mt-5 border-t border-[#e7e4d9] pt-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-lg">₹{finalPrice.toFixed(0)}</span>
+                          {product.discount > 0 && (
+                            <span className="ml-2 text-sm text-gray-400 line-through">
+                              ₹{product.price}
+                            </span>
+                          )}
+                        </div>
+                        <span className={`text-xs ${product.stock > 0 ? "text-green-700" : "text-red-600"}`}>
+                          {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                        </span>
+                      </div>
+
+                      <a
+                        href={`${whatsapp}?text=${encodeURIComponent(
+                          `Hello Ayukanti, I am interested in ${product.name}. Price: ₹${finalPrice}. Please share details.`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 block rounded-full bg-[#203b2d] px-4 py-3 text-center text-xs text-white"
+                      >
+                        Enquire on WhatsApp ↗
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <section className="mx-5 mb-14 rounded-3xl bg-[#203b2d] px-6 py-12 text-center text-white md:mx-12 md:py-16">
@@ -162,12 +185,7 @@ export default function Home() {
         <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-[#e0e5d9]">
           Have a question about a product? Contact us directly for details.
         </p>
-        <a
-          href={whatsapp}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-7 inline-block rounded-full bg-[#faf8f2] px-7 py-4 text-sm text-[#203b2d]"
-        >
+        <a href={whatsapp} target="_blank" rel="noreferrer" className="mt-7 inline-block rounded-full bg-[#faf8f2] px-7 py-4 text-sm text-[#203b2d]">
           Chat on WhatsApp ↗
         </a>
       </section>
@@ -184,4 +202,3 @@ export default function Home() {
     </main>
   );
       }
-              
